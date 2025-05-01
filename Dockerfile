@@ -1,18 +1,19 @@
-FROM quay.io/eclipse/che-java8-maven:latest
-MAINTAINER tech-tejendra
+FROM maven:3.8.7-openjdk-17 AS build
 
-USER root
+WORKDIR /home/app
 
-COPY src /home/app/src
-COPY pom.xml /home/app
+COPY pom.xml .
+COPY src ./src
 
-#ERROR
-#RUN nocmd
+RUN mvn clean package
 
-RUN mkdir -p /var/local/SP
+# Use a slim runtime image
+FROM openjdk:17-jdk-slim
 
-RUN mvn -f /home/app/pom.xml clean package
+WORKDIR /home/app
+
+COPY --from=build /home/app/target/spring-boot-hello-world-0.0.1-SNAPSHOT.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "/home/app/target/spring-boot-hello-world-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
