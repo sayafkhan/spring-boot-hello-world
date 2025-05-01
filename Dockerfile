@@ -1,4 +1,5 @@
-FROM maven:3.8.7-openjdk-17 AS build
+# Build stage
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 
 WORKDIR /home/app
 
@@ -7,8 +8,8 @@ COPY src ./src
 
 RUN mvn clean package
 
-# Use a slim runtime image
-FROM openjdk:17-jdk-slim
+# Runtime stage
+FROM eclipse-temurin:17-jdk-jammy
 
 WORKDIR /home/app
 
@@ -17,3 +18,4 @@ COPY --from=build /home/app/target/spring-boot-hello-world-0.0.1-SNAPSHOT.jar ap
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
